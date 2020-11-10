@@ -1,3 +1,11 @@
+cls macro
+	pusha
+	mov ah, 0x00
+	mov al, 0x03  
+	int 0x10
+	popa
+endm
+
 .386
 .MODEL flat, stdcall
 OPTION casemap:none
@@ -7,6 +15,15 @@ INCLUDE \masm32\include\kernel32.inc
 INCLUDE \masm32\include\masm32.inc
 INCLUDE \masm32\include\masm32rt.inc
 .DATA
+	;variables para el menu
+	menuPrincipal		db 13,10,"Por favor, ingrese el numero de opcion a ejecutar:",13,10,09,"a. CIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"b. CIFRADO UTILIZANDO LA CLAVE Y MENSAJE  ",13,10,09,"c. DESCIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"d. DESCIFRADO ESTADISTICO ",13,10,09,"e. SALIR ",13,10,">",0
+	textoOpta			db 13,10,"CIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
+	textoOptb			db 13,10,"CIFRADO UTILIZANDO LA CLAVE Y MENSAJE",13,10,0
+	textoOptc			db 13,10,"DESCIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
+	textoOptd			db 13,10,"DESCIFRADO ESTADISTICO",13,10,0
+	textoOptNoValida	db 13,10,"Por favor, ingrese una opcion valida",13,10,0
+	optMenu				db 0,0
+
 	;VARIABLES PARA CREAR LA MATRIZ
 	MATRIZ DW 676 DUP (0),0
 	CadenaL DB "ABCDEFGHIJKLMNOPQRSTUVWXYZ",0
@@ -19,9 +36,43 @@ INCLUDE \masm32\include\masm32rt.inc
 	vAux DB 0,0
 .CODE
 main:
+	MenuPrincipal:
+		INVOKE StdOut, ADDR menuPrincipal ; mensaje para mostra el menu y solicitar una opcion
+		INVOKE StdIn, ADDR optMenu,10	; se lee la opcion del menu principal
+		cmp     optMenu, 'a'				; se evalua que la opcion sea valida
+        jl      OptNoValida                                                                
+        cmp     optMenu, 'e'				; la opcion debe ser un numero entre a y e             
+        jg      OptNoValida                                                        
+        cmp     optMenu, 'a'				; la opcion a ejecuta el crifrado con clave
+        je      cifClave                                                              
+        cmp     optMenu, 'b'				; la opcion b ejecuta el cifrado con clave y palabra
+        je      cifClavePalabra    
+		cmp     optMenu, 'c'				; la opcion c ejecuta el descifrado con clave
+        je      desClave
+		cmp     optMenu, 'd'				; la opcion d eje cuta el descifrado estadisco
+        je      desEstadistico 
+        cmp     optMenu, 'e'             ; la opcion e ejecuta la opcion de salir                                                      
+        jmp     Salir 
+
 	;LLENAR LA MATRIZ CON CARACTERES
 	CALL LLENARMATRIZ
-	INVOKE ExitProcess, 0
+	cifClave:
+		INVOKE StdOut, ADDR textoOpta
+		jmp MenuPrincipal	
+	cifClavePalabra:
+		INVOKE StdOut, ADDR textoOptb
+		jmp MenuPrincipal	
+	desClave:
+		INVOKE StdOut, ADDR textoOptc
+		jmp MenuPrincipal
+	desEstadistico:
+		INVOKE StdOut, ADDR textoOptd
+		jmp MenuPrincipal	
+	OptNoValida:
+		INVOKE StdOut, ADDR textoOptNoValida	; se da a conocer que la opcion no es valida
+		jmp MenuPrincipal
+	Salir:
+		INVOKE ExitProcess, 0	
 
 LLENARMATRIZ PROC FAR
 	XOR BX, BX
