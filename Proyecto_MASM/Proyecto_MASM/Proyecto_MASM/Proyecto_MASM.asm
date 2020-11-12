@@ -22,7 +22,7 @@ INCLUDE \masm32\include\masm32.inc
 INCLUDE \masm32\include\masm32rt.inc
 .DATA
 	;variables para el menu
-	menuPrincipal		db 13,10,"Por favor, ingrese el numero de opcion a ejecutar:",13,10,09,"a. CIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"b. CIFRADO UTILIZANDO LA CLAVE Y MENSAJE  ",13,10,09,"c. DESCIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"d. DESCIFRADO UTILIZANDO LA CLAVE Y PALABRA",13,10,09,"e. DESCIFRADO ESTADISTICO ",13,10,09,"f. CIFRADO ESTADISTICO",13,10,09,"g. SALIR ",13,10,">",0
+	menuPrincipal		db 13,10,"Por favor, ingrese el numero de opcion a ejecutar:",13,10,09,"a. CIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"b. CIFRADO UTILIZANDO LA CLAVE Y MENSAJE  ",13,10,09,"c. DESCIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"d. DESCIFRADO UTILIZANDO LA CLAVE Y PALABRA",13,10,09,"e. DESCIFRADO ESTADISTICO ",13,10,09,"f. CIFRADO ESTADISTICO",13,10,09,"g. SALIR ",13,10,"> ",0
 	textoOpta			db 13,10,"CIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
 	textoOptb			db 13,10,"CIFRADO UTILIZANDO LA CLAVE Y MENSAJE",13,10,0
 	textoOptc			db 13,10,"DESCIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
@@ -31,12 +31,17 @@ INCLUDE \masm32\include\masm32rt.inc
 	textoOptf			db 13,10,"CIFRADO ESTADISTICO",13,10,0
 	textoOptNoValida	db 13,10,"Por favor, ingrese una opcion valida",13,10,0
 	optMenu				db 0,0
-
+	;PROBABILIDAD DE LAS LETRAS
+	;internamente de dividen por 10, pero se toman a si para tomar todos los decimales
+	ProbLetras db 122,15,36,53,140,5,10,12,55,6,1,54,27,66,99,22,20,62,77,38,48,11,0,0,15,4
+	
+	letratemp dd 0
 	;VARIABLES PARA CREAR LA MATRIZ
 	MATRIZ DW 676 DUP (0),0
 	CadenaL DB "ABCDEFGHIJKLMNOPQRSTUVWXYZ",0
 	salto DB 10d, 0
 	espacio DB 32d,0
+	punto db 46d,0
 	ContadorL0 DB 0,0
 	ContadorL1 DB 0,0
 	ContadorL2 DB 26,0
@@ -63,12 +68,15 @@ INCLUDE \masm32\include\masm32rt.inc
 	fila DB 26d, 0
 	j DW 0, 0
 	i DW 0,0
+	ocurrencia db 0,0
 	resultado DW 0,0
 	tamMatriz DW 676,0
 	tamMATRIZ DW 676,0
 	;VARIABLES INCISO C
 	caracter DB 0,0
 	contador DW 0,0
+	contadorProb db 41H,0
+	cu db 0,0
 .CODE
 main:
 	;LLENAR LA MATRIZ CON CARACTERES
@@ -121,8 +129,9 @@ main:
 		jmp MenuPrincipal
 	desEstadistico:
 		INVOKE StdOut, ADDR textoOpte
+		CALL ESTADISTICO
 		jmp MenuPrincipal	
-		cifEstadistico:
+	cifEstadistico:
 		INVOKE StdOut, ADDR textoOptf
 		jmp MenuPrincipal	
 	OptNoValida:
@@ -130,6 +139,67 @@ main:
 		jmp MenuPrincipal
 	Salir:
 		INVOKE ExitProcess, 0
+
+;PROCEDIMIENTO PARA ROMPER CON ESTADISTICA
+ESTADISTICO proc near
+	INVOKE StdOut, ADDR nt0
+	INVOKE StdIn, ADDR mensaje, 100d
+	lea esi, mensaje
+	mov ocurrencia, 00h
+	romper:
+		lea edi, ProbLetras
+		xor ax, ax
+		xor ebx,ebx
+		mov bl, [esi]
+		cmp bl, al
+		je darProb
+		sub bl,41h
+		add edi,ebx
+		mov eax,[edi]
+		inc eax
+		mov [edi],eax
+		mov bl,[edi]
+		inc ocurrencia
+		inc esi
+		jmp romper
+	darProb:
+		call MOSTRARPROB
+RET
+ESTADISTICO ENDP
+MOSTRARPROB PROC near
+	lea esi,CadenaL
+	lea edi, ProbLetras
+	Mostrar:
+		xor ebx,ebx
+		mov bl,[esi]
+		cmp bl,41h
+		jl retornar
+		mov edx,edi
+		lea edi, letratemp 
+		mov [edi],ebx	
+		mov edi,edx
+		printf("La probabilidad de la letra ")
+		INVOKE StdOut, ADDR contadorProb
+		inc contadorProb
+		printf(" es: ")
+		INVOKE StdOut, ADDR espacio
+		MOV AL, [edi]
+		MOV CL,10
+		div cl
+		print str$(al)
+		INVOKE StdOut, ADDR punto
+		print str$(ah),13,10
+		inc esi
+		inc edi
+		INVOKE StdOut,ADDR salto
+		jmp Mostrar
+
+	retornar:
+		INVOKE StdOut, ADDR nt4
+		mov contadorProb, 41H
+
+ret
+MOSTRARPROB ENDP
 ;PROCEDIMIENTOS INCISO D
 DESCIFRADOCLAVEPALABRA PROC NEAR
 	INVOKE StdOut, ADDR nt3
