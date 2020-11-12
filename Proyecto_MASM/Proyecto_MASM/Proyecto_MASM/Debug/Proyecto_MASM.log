@@ -1,4 +1,5 @@
 ﻿  Assembling Proyecto_MASM.asm...
-\masm32\include\windows.inc(9751): warning A6006: structure contains no members
+\masm32\include\winextra.inc(11054): warning A6006: structure contains no members
 \masm32\include\masm32rt.inc(33): warning A4011: multiple .MODEL directives found : .MODEL ignored
-  Proyecto_MASM.vcxproj -> C:\Users\mache\Documents\Tercer Año\Segundo Ciclo\Microprogramación\Proyecto\P2\Proyecto_MASM\Proyecto_MASM\Proyecto_MASM\Debug\Proyecto_MASM.exe
+  LINK : no se encontró C:\Users\ferol\OneDrive\Escritorio\Proyecto_MASM\Proyecto_MASM\Proyecto_MASM\Debug\Proyecto_MASM.exe o no lo generó el último vínculo incremental; ejecutando vínculo completo
+  Proyecto_MASM.vcxproj -> C:\Users\ferol\OneDrive\Escritorio\Proyecto_MASM\Proyecto_MASM\Proyecto_MASM\Debug\Proyecto_MASM.exe
