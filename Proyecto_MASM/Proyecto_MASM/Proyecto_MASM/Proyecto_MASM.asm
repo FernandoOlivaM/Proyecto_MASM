@@ -27,8 +27,8 @@ INCLUDE \masm32\include\masm32rt.inc
 	textoOptb			db 13,10,"CIFRADO UTILIZANDO LA CLAVE Y MENSAJE",13,10,0
 	textoOptc			db 13,10,"DESCIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
 	textoOptd			db 13,10,"DESCIFRADO UTILIZANDO LA CLAVE Y PALABRA",13,10,0
-	textoOpte			db 13,10,"DESCIFRADO ESTADISTICO",13,10,0
-	textoOptf			db 13,10,"CIFRADO ESTADISTICO",13,10,0
+	textoOpte			db 13,10,"OBTENER ESTADISTICAS",13,10,0
+	textoOptf			db 13,10,"TERMINANDO LA EJECUCION...",13,10,0
 	textoOptNoValida	db 13,10,"Por favor, ingrese una opcion valida",13,10,0
 	optMenu				db 0,0
 	;PROBABILIDAD DE LAS LETRAS
@@ -42,6 +42,7 @@ INCLUDE \masm32\include\masm32rt.inc
 	salto DB 10d, 0
 	espacio DB 32d,0
 	punto db 46d,0
+	porcentaje db 37d,0
 	ContadorL0 DB 0,0
 	ContadorL1 DB 0,0
 	ContadorL2 DB 26,0
@@ -132,11 +133,12 @@ main:
 		INVOKE StdOut, ADDR textoOptNoValida	; se da a conocer que la opcion no es valida
 		jmp MenuPrincipal
 	Salir:
+		INVOKE StdOut, ADDR textoOptf
 		INVOKE ExitProcess, 0
 
 ;PROCEDIMIENTO PARA ROMPER CON ESTADISTICA
 ESTADISTICO proc near
-	INVOKE StdOut, ADDR nt0
+	INVOKE StdOut, ADDR nt3
 	INVOKE StdIn, ADDR mensaje, 100d
 	lea esi, mensaje
 	mov ocurrencia, 00h
@@ -182,7 +184,9 @@ MOSTRARPROB PROC near
 		div cl
 		print str$(al)
 		INVOKE StdOut, ADDR punto
-		print str$(bl),13,10
+		print str$(bl)
+		INVOKE StdOut, ADDR espacio
+		INVOKE StdOut, ADDR porcentaje
 		inc esi
 		inc edi
 		INVOKE StdOut,ADDR salto
