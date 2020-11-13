@@ -57,7 +57,7 @@ INCLUDE \masm32\include\masm32rt.inc
 	mensaje DB 100 DUP (0) , 0
 	clave DB 100 DUP (0) , 0
 	MENSAJE DB 100 DUP (0),0
-	CLAVE DB 100 DUP (0),0
+	CLAVE DB 200 DUP (0),0
 	limpiar DB 100 DUP (0),0
 	posCM DB 0,0
 	posCC DB 0,0
