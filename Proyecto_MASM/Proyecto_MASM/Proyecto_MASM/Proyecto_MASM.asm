@@ -22,7 +22,7 @@ INCLUDE \masm32\include\masm32.inc
 INCLUDE \masm32\include\masm32rt.inc
 .DATA
 	;variables para el menu
-	menuPrincipal		db 13,10,"Por favor, ingrese el numero de opcion a ejecutar:",13,10,09,"a. CIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"b. CIFRADO UTILIZANDO LA CLAVE Y MENSAJE  ",13,10,09,"c. DESCIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"d. DESCIFRADO UTILIZANDO LA CLAVE Y PALABRA",13,10,09,"e. DESCIFRADO ESTADISTICO ",13,10,09,"f. CIFRADO ESTADISTICO",13,10,09,"g. SALIR ",13,10,"> ",0
+	menuPrincipal		db 13,10,"Por favor, ingrese el numero de opcion a ejecutar:",13,10,09,"a. CIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"b. CIFRADO UTILIZANDO LA CLAVE Y MENSAJE  ",13,10,09,"c. DESCIFRADO UTILIZANDO SOLO LA CLAVE ",13,10,09,"d. DESCIFRADO UTILIZANDO LA CLAVE Y PALABRA",13,10,09,"e. OBTENER ESTADISTICA ",13,10,09,"f. SALIR",13,10,"> ",0
 	textoOpta			db 13,10,"CIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
 	textoOptb			db 13,10,"CIFRADO UTILIZANDO LA CLAVE Y MENSAJE",13,10,0
 	textoOptc			db 13,10,"DESCIFRADO UTILIZANDO SOLO LA CLAVE",13,10,0
@@ -34,7 +34,7 @@ INCLUDE \masm32\include\masm32rt.inc
 	;PROBABILIDAD DE LAS LETRAS
 	;internamente de dividen por 10, pero se toman a si para tomar todos los decimales
 	ProbLetras db 122,15,36,53,140,5,10,12,55,6,1,54,27,66,99,22,20,62,77,38,48,11,0,0,15,4
-	
+	letras 	db 41h,42h,43h,44h,45h,46h,47h,48h,49h,4Ah,4Bh,4Ch,4Dh,4Eh,4Fh,50h,51h,52h,53h,54h,55h,56h,57h,58h,59h
 	letratemp dd 0
 	;VARIABLES PARA CREAR LA MATRIZ
 	MATRIZ DW 676 DUP (0),0
@@ -86,7 +86,7 @@ main:
 		INVOKE StdIn, ADDR optMenu,10	; se lee la opcion del menu principal
 		cmp     optMenu, 'a'				; se evalua que la opcion sea valida
         jl      OptNoValida                                                                
-        cmp     optMenu, 'g'				; la opcion debe ser un numero entre a y e             
+        cmp     optMenu, 'f'				; la opcion debe ser un numero entre a y e             
         jg      OptNoValida                                                        
         cmp     optMenu, 'a'				; la opcion a ejecuta el crifrado con clave
         je      cifClave                                                              
@@ -97,12 +97,9 @@ main:
 		cmp     optMenu, 'd'				; la opcion d ejecuta el descifrado con clave y palabra
         je      desClavePalabra
 		cmp     optMenu, 'e'				; la opcion d eje cuta el descifrado estadisco
-        je      desEstadistico 
-		cmp     optMenu, 'f'				; la opcion e eje cuta el cifrado estadisco
-        je      cifEstadistico 
-        cmp     optMenu, 'g'             ; la opcion f ejecuta la opcion de salir                                                      
+        je      obtProba 
+        cmp     optMenu, 'f'             ; la opcion f ejecuta la opcion de salir                                                      
         jmp     Salir 
-
 	cifClave:
 		INVOKE StdOut, ADDR textoOpta
 		CALL LLENARMATRIZ
@@ -127,12 +124,9 @@ main:
 		CALL DESCIFRADOCLAVEPALABRA
 		CALL LIMPIARCADENAS
 		jmp MenuPrincipal
-	desEstadistico:
+	obtProba:
 		INVOKE StdOut, ADDR textoOpte
 		CALL ESTADISTICO
-		jmp MenuPrincipal	
-	cifEstadistico:
-		INVOKE StdOut, ADDR textoOptf
 		jmp MenuPrincipal	
 	OptNoValida:
 		INVOKE StdOut, ADDR textoOptNoValida	; se da a conocer que la opcion no es valida
@@ -167,7 +161,7 @@ ESTADISTICO proc near
 RET
 ESTADISTICO ENDP
 MOSTRARPROB PROC near
-	lea esi,CadenaL
+	lea esi, letras
 	lea edi, ProbLetras
 	Mostrar:
 		xor ebx,ebx
@@ -188,17 +182,15 @@ MOSTRARPROB PROC near
 		div cl
 		print str$(al)
 		INVOKE StdOut, ADDR punto
-		print str$(ah),13,10
+		print str$(bl),13,10
 		inc esi
 		inc edi
 		INVOKE StdOut,ADDR salto
 		jmp Mostrar
 
 	retornar:
-		INVOKE StdOut, ADDR nt4
 		mov contadorProb, 41H
-
-ret
+		ret
 MOSTRARPROB ENDP
 ;PROCEDIMIENTOS INCISO D
 DESCIFRADOCLAVEPALABRA PROC NEAR
